@@ -27,6 +27,16 @@ function ComputeGraphic({ variant = "b200" }: { variant?: "b200" | "rtx" }) {
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false); const [sent, setSent] = useState(false); const [sending, setSending] = useState(false); const storyRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (window.location.hash) return;
+    window.history.scrollRestoration = "manual";
+    const resetScroll = () => window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    resetScroll();
+    const frame = requestAnimationFrame(resetScroll);
+    const handlePageShow = () => { if (!window.location.hash) resetScroll(); };
+    window.addEventListener("pageshow", handlePageShow);
+    return () => { cancelAnimationFrame(frame); window.removeEventListener("pageshow", handlePageShow); };
+  }, []);
   useEffect(() => { const items = document.querySelectorAll<HTMLElement>("[data-reveal]"); const observer = new IntersectionObserver((entries) => entries.forEach((entry) => entry.isIntersecting && entry.target.classList.add("is-visible")), { threshold: 0.15 }); items.forEach((item) => observer.observe(item)); return () => observer.disconnect(); }, []);
   useEffect(() => {
     const story = storyRef.current; if (!story) return;
