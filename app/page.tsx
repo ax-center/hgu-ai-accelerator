@@ -50,7 +50,7 @@ export default function Home() {
       frame = 0;
       if (!desktop.matches || reduced.matches) { scenes.forEach((scene) => scene.removeAttribute("style")); sceneNav?.classList.remove("is-visible"); return; }
       const rect = story.getBoundingClientRect(); const range = Math.max(1, story.offsetHeight - window.innerHeight); const progress = clamp(-rect.top / range) * (scenes.length - 1); const current = Math.min(scenes.length - 1, Math.floor(progress)); const next = Math.min(scenes.length - 1, current + 1); const phase = progress - current;
-      const active = Math.round(progress); sceneNav?.classList.toggle("is-visible", rect.top <= 0 && rect.bottom >= window.innerHeight); dots.forEach((dot, index) => { dot.classList.toggle("is-active", index === active); dot.setAttribute("aria-current", index === active ? "step" : "false"); });
+      const active = Math.round(progress); sceneNav?.classList.toggle("is-visible", rect.top <= 0 && rect.bottom >= window.innerHeight && active > 0); dots.forEach((dot) => { const index = Number(dot.dataset.sceneIndex); dot.classList.toggle("is-active", index === active); dot.setAttribute("aria-current", index === active ? "step" : "false"); });
       scenes.forEach((scene, index) => {
         let opacity = 0; let scale = 1.02; let y = 24; let blur = 4; let zIndex = 1;
         if (index === current) { const outgoing = smoothstep(0, .45, phase); opacity = 1 - outgoing; scale = 1 - .02 * outgoing; y = -20 * outgoing; blur = 4 * outgoing; zIndex = 11; }
@@ -76,7 +76,7 @@ export default function Home() {
     <div id="top" className="scroll-story" ref={storyRef}>
       <span id="about" className="story-anchor about-anchor" aria-hidden="true" />
       <span id="infrastructure" className="story-anchor infrastructure-anchor" aria-hidden="true" />
-      <nav className="story-nav" aria-label="인프라 장면 이동">{sceneLabels.map((label, index) => <button type="button" key={label} data-scene-dot onClick={() => goToStoryScene(index)} aria-label={`${label} 장면으로 이동`}><span>{label}</span><i /></button>)}</nav>
+      <nav className="story-nav" aria-label="인프라 장면 이동">{sceneLabels.slice(1).map((label, offset) => { const index = offset + 1; return <button type="button" key={label} data-scene-dot data-scene-index={index} onClick={() => goToStoryScene(index)} aria-label={`${label} 장면으로 이동`}><span>{label}</span><i /></button>; })}</nav>
       <div className="story-stage">
         <section className="story-scene hero"><div className="hero-grid" aria-hidden="true" /><div className="hero-copy"><p className="eyebrow">HANDONG GLOBAL UNIVERSITY <span /> AI INNOVATION CENTER</p><h1>한동대학교<br /><em>AI Accelerator</em></h1><p className="hero-lead">연구와 교육을 위한<br />고성능 AI Computing Infrastructure</p><p className="hero-desc">한동대학교 AI 혁신센터가 운영하는 GPU 기반 AI 연구 인프라를 소개합니다.</p><div className="hero-actions"><a className="button primary" href="#infrastructure">인프라 살펴보기 <ArrowDown size={17} /></a><a className="button secondary" href="#access">이용 방법</a></div></div><HeroCoin /><div className="scroll-cue"><span>SCROLL TO EXPLORE</span><i /></div></section>
         <section className="story-scene stats-section"><div className="story-index">01 / 04</div><div className="section-kicker">INFRASTRUCTURE AT A GLANCE</div><div className="stats-grid">{stats.map(([value,label,desc]) => <article key={label}><strong>{value}</strong><h3>{label}</h3><p>{desc}</p></article>)}</div></section>

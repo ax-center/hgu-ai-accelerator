@@ -15,7 +15,7 @@ function Coin() {
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.center.set(.5, .5);
     texture.rotation = Math.PI / 2;
-    texture.repeat.set(1.04, 1.04);
+    texture.repeat.set(1.1, 1.1);
     texture.anisotropy = Math.min(8, gl.capabilities.getMaxAnisotropy());
     texture.needsUpdate = true;
   }, [gl, texture]);
@@ -49,15 +49,15 @@ function Coin() {
     <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
       <cylinderGeometry args={[2, 2, .2, segments, 1, false]} />
       <meshPhysicalMaterial attach="material-0" color="#07366d" metalness={.58} roughness={.3} clearcoat={.45} clearcoatRoughness={.32} />
-      <meshPhysicalMaterial attach="material-1" map={texture} transparent alphaTest={.04} metalness={.05} roughness={.5} />
-      <meshPhysicalMaterial attach="material-2" map={texture} transparent alphaTest={.04} metalness={.05} roughness={.5} />
+      <meshPhysicalMaterial attach="material-1" map={texture} transparent alphaTest={.5} metalness={.05} roughness={.5} />
+      <meshPhysicalMaterial attach="material-2" map={texture} transparent alphaTest={.5} metalness={.05} roughness={.5} />
     </mesh>
   </group>;
 }
 
 export default function HeroCoin() {
   return <div className="hero-coin" aria-label="드래그하여 회전할 수 있는 한동대학교 AI 혁신센터 3D 로고">
-    <Canvas dpr={[1, 1.5]} camera={{ position: [0, .15, 6.2], fov: 38 }} shadows gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}>
+    <Canvas dpr={[1, 1.5]} camera={{ position: [0, .15, 9], fov: 38 }} shadows gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}>
       <ambientLight intensity={1.15} />
       <hemisphereLight args={["#dceeff", "#071d35", 1.25]} />
       <directionalLight position={[4, 5, 6]} intensity={2.8} color="#ffffff" castShadow shadow-mapSize={[1024, 1024]} />
