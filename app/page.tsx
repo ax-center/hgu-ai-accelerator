@@ -33,14 +33,17 @@ export default function Home() {
     const scenes = Array.from(story.querySelectorAll<HTMLElement>(".story-scene"));
     const desktop = window.matchMedia("(min-width: 901px)"); const reduced = window.matchMedia("(prefers-reduced-motion: reduce)"); let frame = 0;
     const clamp = (value: number) => Math.max(0, Math.min(1, value));
+    const smooth = (from: number, to: number, value: number) => { const t = clamp((value - from) / (to - from)); return t * t * (3 - 2 * t); };
     const render = () => {
       frame = 0;
       if (!desktop.matches || reduced.matches) { scenes.forEach((scene) => scene.removeAttribute("style")); return; }
-      const rect = story.getBoundingClientRect(); const range = Math.max(1, story.offsetHeight - window.innerHeight); const progress = clamp(-rect.top / range) * (scenes.length - 1);
+      const rect = story.getBoundingClientRect(); const range = Math.max(1, story.offsetHeight - window.innerHeight); const progress = clamp(-rect.top / range) * (scenes.length - 1); const current = Math.min(scenes.length - 1, Math.floor(progress)); const next = Math.min(scenes.length - 1, current + 1); const phase = progress - current;
       scenes.forEach((scene, index) => {
-        const delta = progress - index; const outgoing = delta >= 0; const distance = Math.abs(delta); const opacity = distance >= .75 ? 0 : 1 - distance / .75;
-        const amount = clamp(distance / .75); const scale = outgoing ? 1 - .04 * amount : 1.03 - .03 * (1 - amount); const y = outgoing ? -30 * amount : 40 * amount; const blur = 8 * amount;
-        scene.style.opacity = String(opacity); scene.style.transform = `translate3d(0, ${y}px, 0) scale(${scale})`; scene.style.filter = `blur(${blur}px)`; scene.style.pointerEvents = opacity > .65 ? "auto" : "none"; scene.style.zIndex = String(20 - Math.round(distance * 10));
+        let opacity = 0; let amount = 1; let outgoing = false;
+        if (index === current) { amount = smooth(.3, 1, phase); opacity = 1 - amount; outgoing = true; }
+        if (index === next) { const incoming = current === next ? 1 : smooth(0, .7, phase); opacity = Math.max(opacity, incoming); amount = 1 - incoming; outgoing = false; }
+        const scale = outgoing ? 1 - .04 * amount : 1.03 - .03 * (1 - amount); const y = outgoing ? -30 * amount : 40 * amount; const blur = 6 * amount;
+        scene.style.opacity = String(opacity); scene.style.transform = `translate3d(0, ${y}px, 0) scale(${scale})`; scene.style.filter = `blur(${blur}px)`; scene.style.visibility = opacity > .015 ? "visible" : "hidden"; scene.style.pointerEvents = opacity > .55 ? "auto" : "none"; scene.style.zIndex = index === next ? "12" : index === current ? "11" : "1";
       });
     };
     const update = () => { if (!frame) frame = requestAnimationFrame(render); };
