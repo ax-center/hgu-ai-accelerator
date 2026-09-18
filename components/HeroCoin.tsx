@@ -7,7 +7,7 @@ import * as THREE from "three";
 function Coin() {
   const group = useRef<THREE.Group>(null);
   const { gl } = useThree();
-  const texture = useLoader(THREE.TextureLoader, "/HGUlogo.png");
+  const texture = useLoader(THREE.TextureLoader, "/HGUlogo-cropped.png");
   const motion = useRef({ dragging: false, lastX: 0, lastY: 0, rotX: THREE.MathUtils.degToRad(-8), rotY: THREE.MathUtils.degToRad(20), velocityX: 0, velocityY: 0, parallaxX: 0, parallaxY: 0, resumeAt: 0 });
   const segments = useMemo(() => typeof window !== "undefined" && window.innerWidth < 720 ? 64 : 128, []);
 
@@ -15,7 +15,7 @@ function Coin() {
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.center.set(.5, .5);
     texture.rotation = Math.PI / 2;
-    texture.repeat.set(1.1, 1.1);
+    texture.repeat.set(1, 1);
     texture.anisotropy = Math.min(8, gl.capabilities.getMaxAnisotropy());
     texture.needsUpdate = true;
   }, [gl, texture]);
@@ -63,7 +63,6 @@ export default function HeroCoin() {
       <directionalLight position={[4, 5, 6]} intensity={2.8} color="#ffffff" castShadow shadow-mapSize={[1024, 1024]} />
       <directionalLight position={[-4, 1, 3]} intensity={1.25} color="#4ca7e8" />
       <Coin />
-      <mesh position={[0, -2.12, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow><planeGeometry args={[5.2, 3.2]} /><shadowMaterial transparent opacity={.18} /></mesh>
     </Canvas>
     <p>DRAG TO ROTATE</p>
   </div>;
