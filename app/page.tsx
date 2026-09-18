@@ -6,6 +6,7 @@ import { ArrowDown, ArrowRight, BrainCircuit, CheckCircle2, Database, Dna, Eye, 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const stats = [["24", "GPUs", "대규모 학습을 위한 가속 자원"], ["200 TB", "Storage", "연구 데이터를 위한 고속 스토리지"], ["3", "Layers", "연산·스토리지 통합"]];
+const sceneLabels = ["AI Accelerator", "핵심 수치", "NVIDIA B200", "RTX PRO 6000", "통합 인프라"];
 const useCases = [
   { icon: BrainCircuit, title: "AI / LLM", text: "대규모 언어모델 학습과 추론" }, { icon: Eye, title: "Computer Vision", text: "고해상도 영상 분석과 모델 개발" },
   { icon: Dna, title: "Bio AI", text: "생명과학 데이터 기반 AI 연구" }, { icon: Database, title: "Data Science", text: "대규모 데이터 분석과 실험" },
@@ -40,14 +41,15 @@ export default function Home() {
   useEffect(() => { const items = document.querySelectorAll<HTMLElement>("[data-reveal]"); const observer = new IntersectionObserver((entries) => entries.forEach((entry) => entry.isIntersecting && entry.target.classList.add("is-visible")), { threshold: 0.15 }); items.forEach((item) => observer.observe(item)); return () => observer.disconnect(); }, []);
   useEffect(() => {
     const story = storyRef.current; if (!story) return;
-    const scenes = Array.from(story.querySelectorAll<HTMLElement>(".story-scene"));
-    const desktop = window.matchMedia("(min-width: 901px)"); const reduced = window.matchMedia("(prefers-reduced-motion: reduce)"); let frame = 0;
+    const scenes = Array.from(story.querySelectorAll<HTMLElement>(".story-scene")); const dots = Array.from(story.querySelectorAll<HTMLButtonElement>("[data-scene-dot]")); const sceneNav = story.querySelector<HTMLElement>(".story-nav");
+    const desktop = window.matchMedia("(min-width: 901px)"); const reduced = window.matchMedia("(prefers-reduced-motion: reduce)"); let frame = 0; let snapTimer = 0;
     const clamp = (value: number) => Math.max(0, Math.min(1, value));
     const smoothstep = (from: number, to: number, value: number) => { const t = clamp((value - from) / (to - from)); return t * t * (3 - 2 * t); };
     const render = () => {
       frame = 0;
-      if (!desktop.matches || reduced.matches) { scenes.forEach((scene) => scene.removeAttribute("style")); return; }
+      if (!desktop.matches || reduced.matches) { scenes.forEach((scene) => scene.removeAttribute("style")); sceneNav?.classList.remove("is-visible"); return; }
       const rect = story.getBoundingClientRect(); const range = Math.max(1, story.offsetHeight - window.innerHeight); const progress = clamp(-rect.top / range) * (scenes.length - 1); const current = Math.min(scenes.length - 1, Math.floor(progress)); const next = Math.min(scenes.length - 1, current + 1); const phase = progress - current;
+      const active = Math.round(progress); sceneNav?.classList.toggle("is-visible", rect.top <= 0 && rect.bottom >= window.innerHeight); dots.forEach((dot, index) => { dot.classList.toggle("is-active", index === active); dot.setAttribute("aria-current", index === active ? "step" : "false"); });
       scenes.forEach((scene, index) => {
         let opacity = 0; let scale = 1.02; let y = 24; let blur = 4; let zIndex = 1;
         if (index === current) { const outgoing = smoothstep(0, .45, phase); opacity = 1 - outgoing; scale = 1 - .02 * outgoing; y = -20 * outgoing; blur = 4 * outgoing; zIndex = 11; }
@@ -55,16 +57,25 @@ export default function Home() {
         scene.style.opacity = String(opacity); scene.style.transform = `translate3d(0, ${y}px, 0) scale(${scale})`; scene.style.filter = `blur(${blur}px)`; scene.style.visibility = opacity > .01 ? "visible" : "hidden"; scene.style.pointerEvents = opacity > .6 ? "auto" : "none"; scene.style.zIndex = String(zIndex);
       });
     };
-    const update = () => { if (!frame) frame = requestAnimationFrame(render); };
+    const snapToClosest = () => {
+      if (!desktop.matches || reduced.matches) return;
+      const rect = story.getBoundingClientRect(); if (rect.top > 0 || rect.bottom < window.innerHeight) return;
+      const range = Math.max(1, story.offsetHeight - window.innerHeight); const progress = clamp(-rect.top / range) * (scenes.length - 1); const closest = Math.round(progress);
+      const target = story.offsetTop + (closest / (scenes.length - 1)) * range;
+      if (Math.abs(window.scrollY - target) > 2) window.scrollTo({ top: target, behavior: "smooth" });
+    };
+    const update = () => { if (!frame) frame = requestAnimationFrame(render); window.clearTimeout(snapTimer); snapTimer = window.setTimeout(snapToClosest, 140); };
     render(); window.addEventListener("scroll", update, { passive: true }); window.addEventListener("resize", update); desktop.addEventListener("change", update); reduced.addEventListener("change", update);
-    return () => { cancelAnimationFrame(frame); window.removeEventListener("scroll", update); window.removeEventListener("resize", update); desktop.removeEventListener("change", update); reduced.removeEventListener("change", update); scenes.forEach((scene) => scene.removeAttribute("style")); };
+    return () => { cancelAnimationFrame(frame); window.clearTimeout(snapTimer); window.removeEventListener("scroll", update); window.removeEventListener("resize", update); desktop.removeEventListener("change", update); reduced.removeEventListener("change", update); scenes.forEach((scene) => scene.removeAttribute("style")); };
   }, []);
+  function goToStoryScene(index: number) { const story = storyRef.current; if (!story) return; const range = Math.max(1, story.offsetHeight - window.innerHeight); window.scrollTo({ top: story.offsetTop + (index / (sceneLabels.length - 1)) * range, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); }
   async function submitContact(event: React.FormEvent<HTMLFormElement>) { event.preventDefault(); setSending(true); const response = await fetch("/api/contact", { method: "POST", body: new FormData(event.currentTarget) }); setSending(false); if (response.ok) setSent(true); else alert("문의 전송에 실패했습니다. 잠시 후 다시 시도해 주세요."); }
   return <main>
     <header className="site-header"><a href="#top" className="brand" aria-label="한동대학교 AI 혁신센터 홈"><Image src="/hgu_logo.svg" width={145} height={40} alt="한동대학교" priority /><span><b>AI 혁신센터</b><small>AI ACCELERATOR</small></span></a><nav className={menuOpen ? "open" : ""} aria-label="주요 메뉴">{[["소개","#about"],["인프라","#infrastructure"],["이용방법","#access"],["이용요금","#pricing"],["FAQ","#faq"]].map(([label, href]) => <a key={href} href={href} onClick={() => setMenuOpen(false)}>{label}</a>)}</nav><a className="header-cta" href="#contact">이용 안내 <ArrowRight size={16} /></a><button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="메뉴 열기">{menuOpen ? <X /> : <Menu />}</button></header>
     <div id="top" className="scroll-story" ref={storyRef}>
       <span id="about" className="story-anchor about-anchor" aria-hidden="true" />
       <span id="infrastructure" className="story-anchor infrastructure-anchor" aria-hidden="true" />
+      <nav className="story-nav" aria-label="인프라 장면 이동">{sceneLabels.map((label, index) => <button type="button" key={label} data-scene-dot onClick={() => goToStoryScene(index)} aria-label={`${label} 장면으로 이동`}><span>{label}</span><i /></button>)}</nav>
       <div className="story-stage">
         <section className="story-scene hero"><div className="hero-grid" aria-hidden="true" /><div className="hero-copy"><p className="eyebrow">HANDONG GLOBAL UNIVERSITY <span /> AI INNOVATION CENTER</p><h1>한동대학교<br /><em>AI Accelerator</em></h1><p className="hero-lead">연구와 교육을 위한<br />고성능 AI Computing Infrastructure</p><p className="hero-desc">한동대학교 AI 혁신센터가 운영하는 GPU 기반 AI 연구 인프라를 소개합니다.</p><div className="hero-actions"><a className="button primary" href="#infrastructure">인프라 살펴보기 <ArrowDown size={17} /></a><a className="button secondary" href="#access">이용 방법</a></div></div><div className="hero-system" aria-hidden="true"><div className="system-ring r1" /><div className="system-ring r2" /><div className="system-core">AI<small>ACCELERATOR</small></div>{["GPU 01","GPU 02","100 GbE","STORAGE"].map((x, i) => <span className={`node n${i+1}`} key={x}>{x}</span>)}</div><div className="scroll-cue"><span>SCROLL TO EXPLORE</span><i /></div></section>
         <section className="story-scene stats-section"><div className="story-index">01 / 04</div><div className="section-kicker">INFRASTRUCTURE AT A GLANCE</div><div className="stats-grid">{stats.map(([value,label,desc]) => <article key={label}><strong>{value}</strong><h3>{label}</h3><p>{desc}</p></article>)}</div></section>
