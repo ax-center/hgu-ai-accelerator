@@ -13,6 +13,9 @@ function Coin() {
 
   useEffect(() => {
     texture.colorSpace = THREE.SRGBColorSpace;
+    texture.center.set(.5, .5);
+    texture.rotation = Math.PI / 2;
+    texture.repeat.set(1.04, 1.04);
     texture.anisotropy = Math.min(8, gl.capabilities.getMaxAnisotropy());
     texture.needsUpdate = true;
   }, [gl, texture]);
@@ -45,12 +48,10 @@ function Coin() {
   return <group ref={group} rotation={[THREE.MathUtils.degToRad(-8), THREE.MathUtils.degToRad(20), 0]}>
     <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
       <cylinderGeometry args={[2, 2, .2, segments, 1, false]} />
-      <meshPhysicalMaterial attach="material-0" color="#061d39" metalness={.72} roughness={.27} clearcoat={.5} clearcoatRoughness={.32} />
-      <meshPhysicalMaterial attach="material-1" map={texture} metalness={.05} roughness={.5} />
-      <meshPhysicalMaterial attach="material-2" map={texture} metalness={.05} roughness={.5} />
+      <meshPhysicalMaterial attach="material-0" color="#07366d" metalness={.58} roughness={.3} clearcoat={.45} clearcoatRoughness={.32} />
+      <meshPhysicalMaterial attach="material-1" map={texture} transparent alphaTest={.04} metalness={.05} roughness={.5} />
+      <meshPhysicalMaterial attach="material-2" map={texture} transparent alphaTest={.04} metalness={.05} roughness={.5} />
     </mesh>
-    <mesh position={[0, 0, .102]}><torusGeometry args={[1.985, .025, 8, segments]} /><meshStandardMaterial color="#1769aa" metalness={.55} roughness={.34} /></mesh>
-    <mesh position={[0, 0, -.102]}><torusGeometry args={[1.985, .025, 8, segments]} /><meshStandardMaterial color="#0b3158" metalness={.55} roughness={.34} /></mesh>
   </group>;
 }
 
