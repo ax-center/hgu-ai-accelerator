@@ -41,32 +41,23 @@ export default function Home() {
   useEffect(() => {
     const story = storyRef.current; if (!story) return;
     const scenes = Array.from(story.querySelectorAll<HTMLElement>(".story-scene"));
-    const desktop = window.matchMedia("(min-width: 901px)"); const reduced = window.matchMedia("(prefers-reduced-motion: reduce)"); let frame = 0; let wheelLocked = false; let wheelTimer = 0;
+    const desktop = window.matchMedia("(min-width: 901px)"); const reduced = window.matchMedia("(prefers-reduced-motion: reduce)"); let frame = 0;
     const clamp = (value: number) => Math.max(0, Math.min(1, value));
+    const smoothstep = (from: number, to: number, value: number) => { const t = clamp((value - from) / (to - from)); return t * t * (3 - 2 * t); };
     const render = () => {
       frame = 0;
       if (!desktop.matches || reduced.matches) { scenes.forEach((scene) => scene.removeAttribute("style")); return; }
-      const rect = story.getBoundingClientRect(); const range = Math.max(1, story.offsetHeight - window.innerHeight); const progress = clamp(-rect.top / range) * (scenes.length - 1); const active = Math.round(progress);
+      const rect = story.getBoundingClientRect(); const range = Math.max(1, story.offsetHeight - window.innerHeight); const progress = clamp(-rect.top / range) * (scenes.length - 1); const current = Math.min(scenes.length - 1, Math.floor(progress)); const next = Math.min(scenes.length - 1, current + 1); const phase = progress - current;
       scenes.forEach((scene, index) => {
-        const isActive = index === active;
-        scene.style.opacity = isActive ? "1" : "0"; scene.style.transform = "none"; scene.style.filter = "none"; scene.style.visibility = isActive ? "visible" : "hidden"; scene.style.pointerEvents = isActive ? "auto" : "none"; scene.style.zIndex = isActive ? "12" : "1";
+        let opacity = 0; let scale = 1.02; let y = 24; let blur = 4; let zIndex = 1;
+        if (index === current) { const outgoing = smoothstep(0, .45, phase); opacity = 1 - outgoing; scale = 1 - .02 * outgoing; y = -20 * outgoing; blur = 4 * outgoing; zIndex = 11; }
+        if (index === next) { const incoming = current === next ? 1 : smoothstep(.15, .7, phase); opacity = Math.max(opacity, incoming); scale = 1.02 - .02 * incoming; y = 24 * (1 - incoming); blur = 4 * (1 - incoming); zIndex = 12; }
+        scene.style.opacity = String(opacity); scene.style.transform = `translate3d(0, ${y}px, 0) scale(${scale})`; scene.style.filter = `blur(${blur}px)`; scene.style.visibility = opacity > .01 ? "visible" : "hidden"; scene.style.pointerEvents = opacity > .6 ? "auto" : "none"; scene.style.zIndex = String(zIndex);
       });
     };
-    const handleWheel = (event: WheelEvent) => {
-      if (!desktop.matches || reduced.matches || Math.abs(event.deltaY) < 8) return;
-      const rect = story.getBoundingClientRect();
-      if (rect.top > 1 || rect.bottom < window.innerHeight - 1) return;
-      event.preventDefault();
-      if (wheelLocked) return;
-      const range = Math.max(1, story.offsetHeight - window.innerHeight); const progress = clamp(-rect.top / range) * (scenes.length - 1); const active = Math.round(progress); const target = active + (event.deltaY > 0 ? 1 : -1);
-      wheelLocked = true;
-      const targetTop = target >= scenes.length ? story.offsetTop + story.offsetHeight : target < 0 ? story.offsetTop : story.offsetTop + (target / (scenes.length - 1)) * range;
-      window.scrollTo({ top: targetTop, behavior: "smooth" });
-      wheelTimer = window.setTimeout(() => { wheelLocked = false; }, 650);
-    };
     const update = () => { if (!frame) frame = requestAnimationFrame(render); };
-    render(); window.addEventListener("scroll", update, { passive: true }); window.addEventListener("wheel", handleWheel, { passive: false }); window.addEventListener("resize", update); desktop.addEventListener("change", update); reduced.addEventListener("change", update);
-    return () => { cancelAnimationFrame(frame); window.clearTimeout(wheelTimer); window.removeEventListener("scroll", update); window.removeEventListener("wheel", handleWheel); window.removeEventListener("resize", update); desktop.removeEventListener("change", update); reduced.removeEventListener("change", update); scenes.forEach((scene) => scene.removeAttribute("style")); };
+    render(); window.addEventListener("scroll", update, { passive: true }); window.addEventListener("resize", update); desktop.addEventListener("change", update); reduced.addEventListener("change", update);
+    return () => { cancelAnimationFrame(frame); window.removeEventListener("scroll", update); window.removeEventListener("resize", update); desktop.removeEventListener("change", update); reduced.removeEventListener("change", update); scenes.forEach((scene) => scene.removeAttribute("style")); };
   }, []);
   async function submitContact(event: React.FormEvent<HTMLFormElement>) { event.preventDefault(); setSending(true); const response = await fetch("/api/contact", { method: "POST", body: new FormData(event.currentTarget) }); setSending(false); if (response.ok) setSent(true); else alert("문의 전송에 실패했습니다. 잠시 후 다시 시도해 주세요."); }
   return <main>
