@@ -87,3 +87,13 @@ body{overflow-x:clip}main{overflow:visible}
   .nvl-specs li{padding:12px 0;display:flex;flex-direction:column;gap:2px;border-bottom:1px solid rgba(255,255,255,.18)}
   .nvl-specs span{color:#9fc0d9;font-size:13px}
 }
+
+/* Scene-specific alignment refinements */
+.nvl-visual{isolation:isolate;overflow:visible}
+.nvl-visual .nvl-halo{z-index:0;width:min(42vw,520px);height:min(42vw,520px);border-color:rgba(126,193,241,.45);background:radial-gradient(circle,rgba(49,143,211,.18),transparent 66%)}
+.nvl-visual img{position:relative;z-index:1}
+.nvl-visual figcaption{position:absolute;z-index:2;right:5%;bottom:7%;padding:12px 15px;border-left:2px solid #75bff2;background:rgba(5,31,57,.88);box-shadow:0 10px 30px rgba(0,0,0,.2)}
+.nvl-visual figcaption span,.nvl-visual figcaption small{display:block}.nvl-visual figcaption span{font-size:13px;font-weight:800}.nvl-visual figcaption small{margin-top:2px;color:#9fc8e7;font-size:10px;font-weight:700;letter-spacing:.12em}
+@media(min-width:901px){.story-scene.pricing-section .refund-policy{align-self:stretch}}
+@media(min-width:901px){.story-scene.layers-section .layer-layout{grid-template-columns:.8fr 1.2fr;gap:54px}.infrastructure-summary{font-size:16px}.infrastructure-summary span{display:block;white-space:nowrap}}
+@media(max-width:900px){.nvl-visual .nvl-halo{width:min(86vw,420px);height:min(86vw,420px)}.nvl-visual figcaption{right:2%;bottom:2%}}
