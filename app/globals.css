@@ -126,3 +126,43 @@ footer{padding:22px max(28px,calc((100vw - 1200px)/2)) 18px}
 .gpu-dropdown a{min-height:42px;padding:9px 10px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-radius:7px;font-size:13px}
 .gpu-dropdown a:hover{color:var(--blue);background:#eef5fc}.gpu-dropdown small{padding:3px 6px;border-radius:12px;color:#527089;background:#edf3f8;font-size:10px;font-weight:700;white-space:nowrap}
 @media(max-width:720px){.gpu-nav{width:100%;font-size:15px}.gpu-nav summary{justify-content:space-between;width:100%;padding:2px 0}.gpu-dropdown{position:static;width:100%;margin-top:9px;padding:6px;transform:none;border-radius:8px;background:#f4f7fa;box-shadow:none}.gpu-dropdown a{width:100%;padding:9px 10px}}
+
+/* AIPub-centered infrastructure system diagram */
+.story-scene.layers-section .layer-layout{align-items:center}
+.infrastructure-summary{margin:0;color:#c3d4e2!important;line-height:1.8}
+.infrastructure-diagram{position:relative;width:100%;max-width:720px;aspect-ratio:720/430;isolation:isolate}
+.infra-connectors{position:absolute;z-index:0;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.infra-connectors-mobile{display:none}
+.infra-connectors path{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.connector-base{stroke:rgba(126,193,241,.28);stroke-width:2}
+.connector-draw{stroke:#77c2f5;stroke-width:2;stroke-dasharray:1;stroke-dashoffset:1}
+.connector-flow{stroke:rgba(205,236,255,.9);stroke-width:2;stroke-dasharray:18 155;stroke-dashoffset:0;opacity:0;filter:drop-shadow(0 0 4px rgba(104,190,249,.45))}
+.connector-dot{fill:#8dcef8;opacity:0;filter:url(#infra-glow)}
+.infra-node{position:absolute;z-index:2;margin:0;border:1px solid rgba(169,211,241,.25);border-radius:18px;color:#f8fbfe;background:linear-gradient(145deg,rgba(17,67,106,.9),rgba(8,42,72,.96));box-shadow:inset 0 1px 0 rgba(255,255,255,.07);transition:border-color .25s ease,background-color .25s ease,transform .25s ease;opacity:0;transform:translateY(12px)}
+.infra-node:hover{border-color:rgba(130,203,250,.5);background:linear-gradient(145deg,rgba(22,77,119,.94),rgba(9,48,82,.98));transform:translateY(0) scale(1.01)}
+.infra-node h3,.infra-node p{margin:0}.infra-node h3{color:#fff;letter-spacing:-.025em}.infra-node p{color:#adc7da;font-size:13px;line-height:1.55}
+.user-node{left:220px;top:0;width:280px;height:76px;padding:12px 20px;display:flex;align-items:center;gap:14px}
+.user-node svg{width:28px;height:28px;padding:6px;box-sizing:content-box;border-radius:12px;color:#8bcdf8;background:rgba(117,191,241,.1)}
+.user-node h3{font-size:17px}.user-node p{margin-top:4px;font-size:12px}
+.aipub-node{left:80px;top:112px;width:560px;height:118px;padding:20px 28px;display:flex;flex-direction:column;justify-content:center;border-color:rgba(126,193,241,.48);background:linear-gradient(135deg,rgba(18,78,123,.98),rgba(8,48,83,.98));box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 16px 35px rgba(0,17,34,.16)}
+.aipub-node>span{margin-bottom:8px;color:#80c9f7;font:700 11px monospace;letter-spacing:.16em}.aipub-node h3{font-size:23px}.aipub-node p{margin-top:8px;font-size:13px}
+.resource-node{top:260px;width:345px;height:126px;padding:14px 20px;display:flex;align-items:center;gap:16px}
+.gpu-node{left:0}.storage-node{right:0}.resource-node img{flex:0 0 auto;width:78px;height:78px;object-fit:contain;filter:drop-shadow(0 10px 14px rgba(0,16,31,.24))}.resource-node h3{margin-bottom:9px;font-size:19px}.resource-node ul{margin:0;padding:0;list-style:none;color:#b9cfdf;font-size:12px;line-height:1.7}.resource-node li{white-space:nowrap}.resource-node small{margin-left:4px;padding:2px 5px;border:1px solid rgba(139,205,248,.28);border-radius:10px;color:#8bcdf8;font-size:9px}
+.layers-section.is-scene-active .user-node{animation:infra-node-in .45s .04s ease-out forwards}.layers-section.is-scene-active .connector-draw.connector-user{animation:infra-line-in .38s .16s ease-out forwards}.layers-section.is-scene-active .aipub-node{animation:infra-node-in .5s .28s ease-out forwards}.layers-section.is-scene-active .connector-draw.connector-branches{animation:infra-line-in .52s .43s ease-out forwards}.layers-section.is-scene-active .resource-node{animation:infra-node-in .5s .62s ease-out forwards}.layers-section.is-scene-active .connector-dot{animation:infra-dot-in .25s .58s ease-out forwards}.layers-section.is-scene-active .connector-flow{animation:infra-flow 2.8s 1s linear infinite;opacity:.72}
+@keyframes infra-node-in{to{opacity:1;transform:translateY(0)}}
+@keyframes infra-line-in{to{stroke-dashoffset:0}}
+@keyframes infra-dot-in{to{opacity:.9}}
+@keyframes infra-flow{to{stroke-dashoffset:-173}}
+
+@media(min-width:901px) and (max-width:1200px){.story-scene.layers-section .layer-layout{grid-template-columns:.7fr 1.3fr;gap:28px}.infrastructure-diagram{transform:scale(.9);transform-origin:center right}.infrastructure-summary span{white-space:normal}}
+@media(max-width:900px){
+  .story-scene.layers-section .layer-layout{display:block}.infrastructure-summary{margin-bottom:34px}.infrastructure-summary span{display:block;white-space:normal}
+  .infrastructure-diagram{max-width:620px;margin:0 auto;aspect-ratio:auto;height:620px}
+  .infra-connectors-desktop{display:none}.infra-connectors-mobile{display:block}
+  .infra-node{left:0;right:0;width:100%;height:auto;min-height:86px}
+  .user-node{top:0;padding:16px 20px}.aipub-node{top:132px;min-height:138px;padding:22px}.resource-node{min-height:126px;padding:18px 20px}.gpu-node{top:318px}.storage-node{top:492px}
+  .resource-node img{width:70px;height:70px}
+  .layers-section.is-visible .user-node{animation:infra-node-in .4s .04s ease-out forwards}.layers-section.is-visible .connector-draw.connector-user{animation:infra-line-in .3s .14s ease-out forwards}.layers-section.is-visible .aipub-node{animation:infra-node-in .45s .26s ease-out forwards}.layers-section.is-visible .connector-draw.connector-branches{animation:infra-line-in .48s .4s ease-out forwards}.layers-section.is-visible .resource-node{animation:infra-node-in .45s .56s ease-out forwards}.layers-section.is-visible .connector-flow{animation:infra-flow 2.8s 1s linear infinite;opacity:.7}
+}
+@media(max-width:520px){.aipub-node h3{font-size:19px}.aipub-node p{font-size:12px}.resource-node h3{font-size:17px}.resource-node img{width:58px;height:58px}.resource-node{gap:14px}}
+@media(prefers-reduced-motion:reduce){.infra-node{opacity:1;transform:none;animation:none!important}.connector-draw{stroke-dashoffset:0;animation:none!important}.connector-flow{display:none}.connector-dot{opacity:.8;animation:none!important}}

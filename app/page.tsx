@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { ArrowDown, ArrowRight, BrainCircuit, CheckCircle2, ChevronDown, Database, Dna, Eye, Menu, Send, Server, Sparkles, X } from "lucide-react";
+import { ArrowDown, ArrowRight, BrainCircuit, CheckCircle2, ChevronDown, Database, Dna, Eye, Menu, Send, Server, Sparkles, Users, X } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import HeroCoin from "@/components/HeroCoin";
 
@@ -24,6 +24,27 @@ const faqs = [
 function ComputeGraphic({ variant = "b200" }: { variant?: "b200" | "rtx" }) {
   const isB200 = variant === "b200";
   return <figure className={`compute-visual ${variant}`}><div className="equipment-halo" aria-hidden="true" /><Image className="equipment-image" src={isB200 ? "/b200.png" : "/pro6000.png"} width={1200} height={1200} sizes="(max-width: 720px) 90vw, 42vw" alt={isB200 ? "NVIDIA B200 GPU 시스템" : "NVIDIA RTX PRO 6000 그래픽 카드"} /><figcaption><span>{isB200 ? "NVIDIA B200" : "RTX PRO 6000"}</span><small>ACTUAL EQUIPMENT</small></figcaption></figure>;
+}
+
+function InfrastructureDiagram() {
+  return <div className="infrastructure-diagram" aria-label="연구자가 AIPub를 통해 GPU 연산 자원과 연구용 저장공간을 이용하는 구조">
+    <svg className="infra-connectors infra-connectors-desktop" viewBox="0 0 720 430" preserveAspectRatio="none" aria-hidden="true">
+      <defs><filter id="infra-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+      <path className="connector-base connector-user" d="M360 76 V112"/><path pathLength="1" className="connector-draw connector-user" d="M360 76 V112"/>
+      <path className="connector-base connector-branches" d="M360 230 V245 H178 V260 M360 245 H542 V260"/><path pathLength="1" className="connector-draw connector-branches" d="M360 230 V245 H178 V260 M360 245 H542 V260"/>
+      <path className="connector-flow connector-user" d="M360 76 V112"/><path className="connector-flow connector-branches" d="M360 230 V245 H178 V260 M360 245 H542 V260"/>
+      {[[360,76],[360,112],[360,230],[360,245],[178,260],[542,260]].map(([cx,cy], index)=><circle key={index} className="connector-dot" cx={cx} cy={cy} r="3.5"/>)}
+    </svg>
+    <svg className="infra-connectors infra-connectors-mobile" viewBox="0 0 100 620" preserveAspectRatio="none" aria-hidden="true">
+      <path className="connector-base connector-user" d="M50 86 V132"/><path pathLength="1" className="connector-draw connector-user" d="M50 86 V132"/>
+      <path className="connector-base connector-branches" d="M50 270 V318 M50 444 V492"/><path pathLength="1" className="connector-draw connector-branches" d="M50 270 V318 M50 444 V492"/>
+      <path className="connector-flow connector-user" d="M50 86 V132"/><path className="connector-flow connector-branches" d="M50 270 V318 M50 444 V492"/>
+    </svg>
+    <article className="infra-node user-node"><Users aria-hidden="true"/><div><h3>연구자 / 사용자</h3><p>AI 가속기 이용 및 연구 수행</p></div></article>
+    <article className="infra-node aipub-node"><span>AI PLATFORM</span><h3>AI 가속기 운영 플랫폼 · AIPub</h3><p>자원 신청 · GPU 할당 · 워크로드 관리 · 사용 모니터링</p></article>
+    <article className="infra-node resource-node gpu-node"><Image src="/images/gpu-compute.png" width={128} height={128} alt="GPU Compute 아이콘"/><div><h3>GPU Compute</h3><ul><li>NVIDIA B200</li><li>RTX PRO 6000</li><li>NVL72 <small>도입 예정</small></li></ul></div></article>
+    <article className="infra-node resource-node storage-node"><Image src="/images/research-storage.png" width={128} height={128} alt="Research Storage 아이콘"/><div><h3>Research Storage</h3><ul><li>Shared Storage</li><li>Local NVMe SSD</li><li>High-Speed NAS Storage</li></ul></div></article>
+  </div>;
 }
 
 export default function Home() {
@@ -51,6 +72,7 @@ export default function Home() {
       const rect = story.getBoundingClientRect(); const range = Math.max(1, story.offsetHeight - window.innerHeight); const progress = clamp(-rect.top / range) * (scenes.length - 1); const current = Math.min(scenes.length - 1, Math.floor(progress)); const next = Math.min(scenes.length - 1, current + 1); const phase = progress - current;
       const active = Math.round(progress); sceneNav?.classList.toggle("is-visible", rect.top <= 0 && rect.bottom > 0 && active > 0); dots.forEach((dot) => { const index = Number(dot.dataset.sceneIndex); dot.classList.toggle("is-active", index === active); dot.setAttribute("aria-current", index === active ? "step" : "false"); });
       scenes.forEach((scene, index) => {
+        scene.classList.toggle("is-scene-active", index === active);
         let opacity = 0; let scale = 1.02; let y = 24; let blur = 4; let zIndex = 1;
         if (index === current) { const outgoing = smoothstep(0, .45, phase); opacity = 1 - outgoing; scale = 1 - .02 * outgoing; y = -20 * outgoing; blur = 4 * outgoing; zIndex = 11; }
         if (index === next) { const incoming = current === next ? 1 : smoothstep(.15, .7, phase); opacity = Math.max(opacity, incoming); scale = 1.02 - .02 * incoming; y = 24 * (1 - incoming); blur = 4 * (1 - incoming); zIndex = 12; }
@@ -76,7 +98,7 @@ export default function Home() {
       <nav className="story-nav" aria-label="페이지 이동">{sceneLabels.slice(1).map((label, offset) => { const index = offset + 1; return <button type="button" key={label} data-scene-dot data-scene-index={index} onClick={() => goToStoryScene(index)} aria-label={`${label} 페이지로 이동`}><span>{label}</span><i /></button>; })}</nav>
       <div className="story-stage">
         <section className="story-scene hero"><div className="hero-grid" aria-hidden="true" /><div className="hero-copy"><p className="eyebrow">HANDONG GLOBAL UNIVERSITY <span /> AI INNOVATION CENTER</p><h1>한동대학교<br /><em>AI Accelerator</em></h1><p className="hero-lead">연구와 교육을 위한<br />고성능 AI Computing Infrastructure</p><p className="hero-desc">한동대학교 AI 혁신센터가 운영하는 GPU 기반 AI 연구 인프라를 소개합니다.</p><div className="hero-actions"><a className="button primary" href="#infrastructure" onClick={(event)=>{event.preventDefault();goToStoryScene(1)}}>인프라 살펴보기 <ArrowDown size={17} /></a><a className="button secondary" href="#access" onClick={(event)=>{event.preventDefault();goToStoryScene(6)}}>이용 방법</a></div></div><HeroCoin /><div className="scroll-cue"><span>SCROLL TO EXPLORE</span><i /></div></section>
-        <section className="story-scene layers-section"><div className="story-index">01 / 09</div><div className="section-heading light"><p className="section-kicker">AI INFRASTRUCTURE</p><h2>연산부터 데이터까지,<br />하나로 연결된 AI 인프라</h2></div><div className="layer-layout"><p className="infrastructure-summary"><span>연구자는 복잡한 인프라를 직접 구성할 필요 없이,</span><span>통합된 환경에서 연구에 집중할 수 있습니다.</span></p><div className="layers">{[['01','AI Platform','연구 환경 · 스케줄링 · 관리'],['02','GPU Compute','B200 · RTX PRO 6000 · NVL72'],['03','Research Storage','Internal SSD Storage + High-Speed NAS SSD Storage']].map(([n,title,text]) => <div className="layer" key={title}><span>{n}</span><strong>{title}</strong><small>{text}</small></div>)}</div></div></section>
+        <section id="infrastructure" className="story-scene layers-section" data-reveal><div className="story-index">01 / 09</div><div className="section-heading light"><p className="section-kicker">AI INFRASTRUCTURE</p><h2>연산부터 데이터까지,<br />하나로 연결된 AI 인프라</h2></div><div className="layer-layout"><p className="infrastructure-summary"><span>AI 가속기 운영 플랫폼을 중심으로</span><span>고성능 GPU 연산 자원과 연구용 저장공간이</span><span>통합된 환경으로 제공됩니다.</span></p><InfrastructureDiagram /></div></section>
         <section id="about" className="story-scene usecase-section intro-section"><div className="story-index">02 / 09</div><div className="section-heading"><p className="section-kicker">ABOUT THE INFRASTRUCTURE</p><h2>아이디어가 연구가 되는 곳</h2></div><div className="usecase-grid">{useCases.map(({icon:Icon,title,text})=><article key={title}><Icon /><h3>{title}</h3><p>{text}</p><span>SUPPORTED AREA</span></article>)}</div><p className="intro-statement">본 AI 인프라는 한동대학교 및 지역 내/외 협력 기관의 AI 연구/산학/교육/행정을 지원하기 위해 구축·운영됩니다.</p></section>
         <section id="b200" className="story-scene compute-section"><div className="story-index">03 / 09</div><div className="compute-row"><div className="compute-copy"><span className="index">01 / PRIMARY COMPUTE</span><h3>NVIDIA B200</h3><p>대규모 AI 학습과 고성능 연산을 위한 핵심 GPU 환경입니다.</p><ul><li><b>8 GPUs</b><span>고밀도 병렬 연산</span></li><li><b>Large-scale AI Training</b><span>대규모 모델 학습</span></li><li><b>HPC · LLM · Deep Learning</b><span>연구 워크로드 최적화</span></li></ul></div><ComputeGraphic /></div></section>
         <section id="rtx-pro-6000" className="story-scene compute-section rtx-scene"><div className="story-index">04 / 09</div><div className="compute-row reverse"><div className="compute-copy"><span className="index">02 / RESEARCH COMPUTE</span><h3>RTX PRO 6000</h3><p>비전, 생성형 AI, 실험 중심 연구를 유연하게 지원합니다.</p><ul><li><b>16 GPUs</b><span>확장 가능한 연구 자원</span></li><li><b>96GB GPU Memory</b><span>대용량 모델과 데이터셋</span></li><li><b>AI · Vision · Research</b><span>다양한 연구 환경</span></li></ul></div><ComputeGraphic variant="rtx" /></div></section>
