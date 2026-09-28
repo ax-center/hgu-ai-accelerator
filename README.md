@@ -1,126 +1,127 @@
-# vinext-starter
+# 한동대학교 AI 가속기 안내 웹사이트
 
-A clean full-stack starter running on [vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and Drizzle support.
+한동대학교 AI 혁신센터가 운영하는 GPU 기반 AI 연구 인프라를 소개하고, 장비 사양과 이용 절차·요금·문의 방법을 안내하는 공식 랜딩 페이지입니다.
 
-## Prerequisites
+## 주요 내용
 
-- Node.js `>=22.13.0`
-- Portable: Windows, macOS, or Linux; no Bash required
-- Managed Linux: managed Linux runtime with Bash, `flock`, `curl`, `sha256sum`, and GNU `timeout`
-- Git is required only for publishing
+- 한동대학교 AI 혁신센터 및 지원 연구 분야 소개
+- AIPub를 중심으로 구성된 AI 인프라 구조 안내
+- NVIDIA B200, NVIDIA RTX PRO 6000 장비 소개
+- NVIDIA GB200 NVL72 도입 예정 안내
+- 이용 신청부터 자원 반환까지의 절차 안내
+- 이용 요금 및 취소·환불 정책 안내 틀
+- FAQ와 문의 접수 폼
 
-## Sites Lifecycle
+## 화면 및 인터랙션
 
-The Sites initializer copies the shared starter and selects managed-linux only when `SITES_MANAGED_LINUX_CONTAINER=1`; otherwise it selects portable. It saves the selection only in ignored `.sites-runtime/execution-profile.json`. Both profiles copy/configure first, then use the plugin's separate `install-dependencies.mjs` step to measure installation independently. Edit source under `app/` and follow the Sites skill for installation, preview, builds, and publishing.
+- 데스크톱에서는 주요 섹션이 한 화면씩 전환되는 스크롤 기반 장면과 스냅 동작을 사용합니다.
+- 모바일에서는 일반적인 세로 스크롤 중심의 반응형 레이아웃으로 동작합니다.
+- 첫 화면에는 한동대학교 AI 혁신센터 로고를 활용한 드래그 가능한 3D 코인이 표시됩니다.
+- AI 인프라 화면은 연구자 → AIPub → GPU·스토리지의 이용 구조를 다이어그램으로 보여줍니다.
+- `prefers-reduced-motion` 환경에서는 움직임을 줄입니다.
 
-Whenever reopening or moving a checkout, run `node <plugin-root>/scripts/configure-execution-profile.mjs` before project commands. Profile changes do not alter tracked source or require reinstalling otherwise-valid dependencies; restart an existing preview to use the new selection. Do not commit or upload `.sites-runtime/`.
+## 기술 스택
 
-This starter does not use `wrangler.jsonc`.
+- React 19, TypeScript
+- Next.js 호환 Vinext + Vite
+- Three.js, React Three Fiber
+- Radix UI / shadcn UI
+- Lucide React
+- Cloudflare Workers 기반 Sites 호스팅
+- Resend 문의 메일 API
 
-`install:ci` runs `npm ci` once against the shared lockfile, disables parent-workspace discovery, and includes required dev/optional dependencies despite production/omit settings. Sharp defaults to prebuilt binaries unless explicitly configured otherwise. Do not overlap installers.
+## 로컬 실행
 
-- **Portable:** Preserve host HOME, npm cache, registry, proxy, temporary paths, retry/concurrency settings, and lifecycle-script policy. Use `--prefer-offline --no-audit --no-fund`.
-- **Managed Linux:** Use the existing project-local HOME/cache/tmp setup and Linux install lock, tarball preflight, and timeout. Restore the image-seeded npm cache only when its lockfile hash matches; retain network fallback. Builds keep their existing timeout. These helpers are not invoked by the portable profile.
+### 요구 환경
 
-`scripts/sites-env.mjs` preserves the caller's HOME, npm cache, proxy, XDG, and temporary-directory configuration while defaulting Wrangler and Miniflare state to the checkout. If npm reports an unwritable cache, select a writable path with `npm_config_cache` for that install. The `dev` and `start` scripts also keep Wrangler logs inside the checkout. Generated `.sites-runtime/` and `.wrangler/` directories are disposable and ignored by Git.
+- Node.js 22.13.0 이상
+- npm
 
-On portable, `npm run dev` uses `vinext dev` with HMR, starting at port 5173. Vinext records the running server in ignored `.vinext/` state, rejects an ordinary duplicate launch, and recovers stale state after a stopped process; exactly simultaneous starts can race. Pass `--port <port>` or `--hostname <host>` after `npm run dev --` when needed; keep portable previews on loopback.
+### 설치 및 개발 서버
 
-For browser QA on managed Linux, use `sites-preview start`. The project's dev script runs Vite and accepts the supervisor's `--host 0.0.0.0 --port 4173 --strictPort` arguments. The internal browser uses `http://terminal.local:4173/`; it is not a user-facing URL. The supervisor owns the preview lifecycle. The ignored local profile survives the supervisor's cleared process environment.
-
-The portable profile simulates ChatGPT sign-in only for loopback development requests. Visit `/signin-with-chatgpt?return_to=/` to sign in as `local_seedy` (`seedy@sites.test`, display name `Seedy`) and `/signout-with-chatgpt?return_to=/` to sign out. The development cookie preserves that identity across server restarts. Mock auth is disabled in the managed-linux profile and is not included in production builds; hosted authentication remains dispatch-owned.
-
-The Worker uses `vinext/server/fetch-handler`, including Vinext's config-aware image handling. After building, `npm start` runs that Worker locally through Wrangler on `127.0.0.1`, sharing `.wrangler/state` with dev preview and local D1 migrations; it does not deploy the site or simulate sign-in. Use the URL printed by the server. Pass `npm start -- --port <port>` to select a different built-preview port.
-
-Local previews use Miniflare's placeholder `Request.cf` metadata without a network lookup. Set `CLOUDFLARE_CF_FETCH_ENABLED=true` to opt into fetching preview metadata; this setting does not change hosted request metadata.
-
-Local tool usage metrics are disabled by default. Set `WRANGLER_SEND_METRICS=true` to opt in.
-
-## Included Shape
-
-- edit site code under `app/`
-- `app/chatgpt-auth.ts` provides optional dispatch-owned ChatGPT sign-in helpers
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/index.ts` reads the D1 binding from the Cloudflare Worker environment
-- `db/schema.ts` starts intentionally empty
-- `@cloudflare/workers-types` provides Worker types; `cloudflare-env.d.ts` declares optional `DB`/`BUCKET` bindings—update these declarations if binding names change
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
-
-## Workspace Auth Headers
-
-Signed-in visitors receive both `oai-authenticated-user-id` and `oai-authenticated-user-email`. Private Sites require every visitor to sign in; public Sites may also have anonymous visitors, for whom neither header is present.
-
-The user ID is stable for the same user on the same Site and different across Sites. Use it as the durable user key; use email and name for display or contact purposes.
-
-SIWC-authenticated workspace sites may also receive `oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty `name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by `oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
-
-Treat the full name as optional and fall back to email when it is absent:
-
-```tsx
-import { headers } from "next/headers";
-
-export default async function Home() {
-  const requestHeaders = await headers();
-  const userId = requestHeaders.get("oai-authenticated-user-id");
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
-
-  const displayName = fullName ?? email;
-  // ...
-}
+```bash
+npm install
+npm run dev
 ```
 
-## Optional Dispatch-Owned ChatGPT Sign-In
+기본 개발 주소는 [http://localhost:5173](http://localhost:5173)입니다.
 
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs optional or required ChatGPT sign-in:
+### 검사 및 빌드
 
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use the returned `userId` as the stable user key for user-owned records; do not use email as a durable identifier.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send anonymous visitors through Sign in with ChatGPT.
-- In a Server Component, start sign-in with `<a href={chatGPTSignInPath(returnTo)} target="_top">`. The auth helper module is server-only; do not import it into a Client Component.
-- Do not use `fetch`, XHR, a client-side router, or a framework link that can prefetch the sign-in route. SIWC must start as a top-level navigation.
-- Never request the AuthAPI authorization endpoint directly. The dispatch-owned `/signin-with-chatgpt` route must start the SIWC flow.
-- Use `chatGPTSignOutPath(returnTo)` for browser sign-out links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because they depend on per-request identity headers.
-
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the OAuth cookies, and identity header injection. Do not implement app routes for those reserved paths. Routes that do not import and call the helper remain anonymous-compatible.
-
-SIWC establishes identity only; it does not prove workspace membership. Use the Sites hosting platform's access policy controls for workspace-wide restrictions, or enforce explicit server-side membership or allowlist checks.
-
-Use SIWC for account pages, user-specific dashboards, saved records, and write actions tied to the current ChatGPT user. Leave public content anonymous.
-
-## Local D1 migrations
-
-For a D1-backed local preview, generate SQL with `npm run db:generate`. Build once through the Sites skill's build entrypoint (or `npm run build` for standalone use) to generate `dist/server/wrangler.json`, rebuilding if bindings change. From the project root, apply each pending migration in order:
-
-```sh
-node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_example.sql
+```bash
+npm run lint
+npm run build
 ```
 
-Replace the filename with the pending migration and `DB` with your D1 binding name if different. Use `.wrangler/state`, not `.wrangler/state/v3`; Wrangler adds the versioned directories. Do not replay migrations already applied locally. This updates only the preview database; publishing applies production migrations separately.
+빌드 결과를 Worker 환경에서 로컬로 확인하려면 다음 명령을 사용합니다.
 
-## Diagnostic Commands
+```bash
+npm run start
+```
 
-- `npm run install:ci`: perform the one locked dependency install
-- `npm run dev`: start the Vite/Vinext development server
-- `npm run build`: build the deployable Sites artifact
-- `npm run start`: preview the built Worker locally with D1/R2 support
-- `npm run db:generate`: generate Drizzle migrations after schema changes
+## 문의 폼 환경 변수
 
-When using the Sites plugin, follow its skill instructions for installation, builds, and publishing. These npm commands remain available for standalone use.
+문의 폼에서 실제 이메일을 전송하려면 실행 또는 호스팅 환경에 다음 값을 설정해야 합니다.
 
-The portable build runs Vinext directly without a host `timeout` command. The managed-linux build uses `scripts/build-verified.sh` and its existing `SITES_BUILD_TIMEOUT` setting.
+```env
+RESEND_API_KEY=re_xxxxxxxxxx
+CONTACT_TO_EMAIL=receiver@example.com
+CONTACT_FROM_EMAIL=AI Accelerator <verified-sender@example.com>
+```
 
-## Learn More
+- `RESEND_API_KEY`: Resend API 키
+- `CONTACT_TO_EMAIL`: 문의를 받을 이메일 주소
+- `CONTACT_FROM_EMAIL`: 발신자 주소. 생략하면 개발용 기본 주소가 사용됩니다.
 
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+`CONTACT_FROM_EMAIL`에 실제 도메인 주소를 사용할 경우 Resend에서 해당 도메인 또는 발신자를 먼저 인증해야 합니다. `.env` 파일과 API 키는 Git에 커밋하지 마세요.
+
+## 프로젝트 구조
+
+```text
+site/
+├─ app/
+│  ├─ api/contact/route.ts   # 문의 메일 전송 API
+│  ├─ globals.css            # 전체 스타일, 장면 전환, 반응형 규칙
+│  ├─ layout.tsx             # 메타데이터와 공통 레이아웃
+│  └─ page.tsx               # 내비게이션과 전체 페이지 콘텐츠
+├─ components/
+│  ├─ HeroCoin.tsx           # 첫 화면의 인터랙티브 3D 코인
+│  └─ ui/                    # 공통 UI 컴포넌트
+├─ public/
+│  ├─ HGUlogo.png            # 헤더와 3D 코인 로고
+│  ├─ text_logo.png          # 푸터 로고
+│  ├─ b200.png               # NVIDIA B200 이미지
+│  ├─ pro6000.png            # NVIDIA RTX PRO 6000 이미지
+│  ├─ nvl72.webp             # NVIDIA GB200 NVL72 이미지
+│  └─ images/                # 인프라 다이어그램용 이미지
+└─ .openai/hosting.json      # Sites 호스팅 설정
+```
+
+## 콘텐츠 수정 가이드
+
+- 메뉴, 섹션 순서, 장비 사양, 이용 절차, 요금, FAQ, 문의 문구: `app/page.tsx`
+- 배치, 색상, 크기, 스크롤 전환, 모바일 스타일: `app/globals.css`
+- 3D 로고 코인의 크기·회전·조명·조작감: `components/HeroCoin.tsx`
+- 문의 메일 제목과 본문 형식: `app/api/contact/route.ts`
+- 페이지 제목, 설명, 파비콘: `app/layout.tsx`
+- 로고와 장비 이미지: `public/`
+
+정적 이미지를 교체할 때 기존 파일명과 투명 배경을 유지하면 코드 수정 없이 반영할 수 있습니다. 이미지 비율이 달라지는 경우 `app/globals.css`의 해당 이미지 스타일도 함께 확인하세요.
+
+## 현재 페이지 순서
+
+1. 소개
+2. AI 인프라
+3. NVIDIA B200
+4. NVIDIA RTX PRO 6000
+5. NVIDIA GB200 NVL72 (도입 예정)
+6. 이용방법
+7. 이용요금
+8. FAQ
+9. 문의
+
+## 배포
+
+이 프로젝트는 `.openai/hosting.json`에 연결된 Sites 프로젝트로 배포하도록 구성되어 있습니다. 배포 전에는 `npm run lint`와 `npm run build`를 실행해 오류가 없는지 확인하세요.
+
+현재 공개 주소: [https://handong-ai-accelerator.songsan3133.chatgpt.site](https://handong-ai-accelerator.songsan3133.chatgpt.site)
