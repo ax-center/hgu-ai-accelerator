@@ -42,7 +42,7 @@ function InfrastructureDiagram() {
     </svg>
     <article className="infra-node user-node"><Users aria-hidden="true"/><div><h3>연구자 / 사용자</h3><p>AI 가속기 이용 및 연구 수행</p></div></article>
     <article className="infra-node aipub-node"><span>AI PLATFORM</span><h3>AI 가속기 운영 플랫폼 · AIPub</h3><p>자원 신청 · GPU 할당 · 워크로드 관리 · 사용 모니터링</p></article>
-    <article className="infra-node resource-node gpu-node"><Image src="/images/gpu-compute.png" width={128} height={128} alt="GPU Compute 아이콘"/><div><h3>GPU Compute</h3><ul><li>NVIDIA B200</li><li>RTX PRO 6000</li><li>NVL72 <small>도입 예정</small></li></ul></div></article>
+    <article className="infra-node resource-node gpu-node"><Image src="/images/gpu-compute.png" width={128} height={128} alt="GPU Compute 아이콘"/><div><h3>GPU</h3><ul><li>NVIDIA B200</li><li>RTX PRO 6000</li><li>NVL72 <small>도입 예정</small></li></ul></div></article>
     <article className="infra-node resource-node storage-node"><Image src="/images/research-storage.png" width={128} height={128} alt="Research Storage 아이콘"/><div><h3>Research Storage</h3><ul><li>Shared Storage</li><li>Local NVMe SSD</li><li>High-Speed NAS Storage</li></ul></div></article>
   </div>;
 }
