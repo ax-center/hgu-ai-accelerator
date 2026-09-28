@@ -4,10 +4,12 @@ import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH?.replace(/\/$/, "") ?? "";
+
 function Coin() {
   const group = useRef<THREE.Group>(null);
   const { gl } = useThree();
-  const texture = useLoader(THREE.TextureLoader, "/HGUlogo-cropped.png");
+  const texture = useLoader(THREE.TextureLoader, `${basePath}/HGUlogo-cropped.png`);
   const motion = useRef({ dragging: false, lastX: 0, lastY: 0, rotX: THREE.MathUtils.degToRad(-8), rotY: THREE.MathUtils.degToRad(20), velocityX: 0, velocityY: 0, parallaxX: 0, parallaxY: 0, resumeAt: 0 });
   const segments = useMemo(() => typeof window !== "undefined" && window.innerWidth < 720 ? 64 : 128, []);
 

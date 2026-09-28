@@ -23,11 +23,12 @@
 ## 기술 스택
 
 - React 19, TypeScript
-- Next.js 호환 Vinext + Vite
+- Next.js 정적 export
 - Three.js, React Three Fiber
 - Radix UI / shadcn UI
 - Lucide React
-- Cloudflare Workers 기반 Sites 호스팅
+- GitHub Pages 호스팅
+- Cloudflare Worker 기반 문의 API
 - Resend 문의 메일 API
 
 ## 로컬 실행
@@ -46,47 +47,70 @@ npm run dev
 
 기본 개발 주소는 [http://localhost:5173](http://localhost:5173)입니다.
 
-### 검사 및 빌드
+### 검사 및 정적 빌드
 
 ```bash
 npm run lint
 npm run build
 ```
 
-빌드 결과를 Worker 환경에서 로컬로 확인하려면 다음 명령을 사용합니다.
+정적 결과물은 `out/`에 생성됩니다. GitHub Pages와 동일한 저장소 하위 경로로 직접 확인하려면 PowerShell에서 다음처럼 빌드합니다.
 
-```bash
-npm run start
+```powershell
+$env:NEXT_PUBLIC_BASE_PATH="/hgu-ai-accelerator"
+npm run build
 ```
 
-## 문의 폼 환경 변수
+## 문의 폼 서버리스 함수
 
-문의 폼에서 실제 이메일을 전송하려면 실행 또는 호스팅 환경에 다음 값을 설정해야 합니다.
+GitHub Pages에는 서버 실행 환경이 없으므로 문의 폼은 별도의 Cloudflare Worker가 Resend API를 호출합니다. 로컬 `.env`에는 다음 값을 설정합니다.
 
 ```env
+NEXT_PUBLIC_CONTACT_API_URL=http://127.0.0.1:8787/contact
+NEXT_PUBLIC_BASE_PATH=
 RESEND_API_KEY=re_xxxxxxxxxx
 CONTACT_TO_EMAIL=receiver@example.com
 CONTACT_FROM_EMAIL=AI Accelerator <verified-sender@example.com>
 ```
 
+- `NEXT_PUBLIC_CONTACT_API_URL`: 브라우저에서 호출할 문의 Worker 주소
 - `RESEND_API_KEY`: Resend API 키
 - `CONTACT_TO_EMAIL`: 문의를 받을 이메일 주소
 - `CONTACT_FROM_EMAIL`: 발신자 주소. 생략하면 개발용 기본 주소가 사용됩니다.
 
 `CONTACT_FROM_EMAIL`에 실제 도메인 주소를 사용할 경우 Resend에서 해당 도메인 또는 발신자를 먼저 인증해야 합니다. `.env` 파일과 API 키는 Git에 커밋하지 마세요.
 
+로컬 Worker 실행 및 타입 검사는 다음 명령을 사용합니다.
+
+```bash
+npm run contact:dev
+npm run contact:typecheck
+```
+
+프로덕션에서는 Worker Secret을 포함해 배포합니다.
+
+```bash
+npm run contact:deploy -- --secrets-file .env
+```
+
+배포가 끝나면 GitHub Pages 빌드 환경의 `NEXT_PUBLIC_CONTACT_API_URL`을 발급된 Worker 주소의 `/contact` 경로로 설정합니다.
+
 ## 프로젝트 구조
 
 ```text
 site/
+├─ .github/workflows/
+│  └─ deploy-pages.yml       # main 브랜치 GitHub Pages 자동 배포
 ├─ app/
-│  ├─ api/contact/route.ts   # 문의 메일 전송 API
 │  ├─ globals.css            # 전체 스타일, 장면 전환, 반응형 규칙
 │  ├─ layout.tsx             # 메타데이터와 공통 레이아웃
 │  └─ page.tsx               # 내비게이션과 전체 페이지 콘텐츠
 ├─ components/
 │  ├─ HeroCoin.tsx           # 첫 화면의 인터랙티브 3D 코인
 │  └─ ui/                    # 공통 UI 컴포넌트
+├─ contact-worker/
+│  ├─ src/index.ts           # GitHub Pages용 문의 서버리스 함수
+│  └─ wrangler.jsonc         # Cloudflare Worker 설정
 ├─ public/
 │  ├─ HGUlogo.png            # 헤더와 3D 코인 로고
 │  ├─ text_logo.png          # 푸터 로고
@@ -94,7 +118,7 @@ site/
 │  ├─ pro6000.png            # NVIDIA RTX PRO 6000 이미지
 │  ├─ nvl72.webp             # NVIDIA GB200 NVL72 이미지
 │  └─ images/                # 인프라 다이어그램용 이미지
-└─ .openai/hosting.json      # Sites 호스팅 설정
+└─ next.config.ts            # 정적 export와 GitHub Pages base path 설정
 ```
 
 ## 콘텐츠 수정 가이드
@@ -102,7 +126,7 @@ site/
 - 메뉴, 섹션 순서, 장비 사양, 이용 절차, 요금, FAQ, 문의 문구: `app/page.tsx`
 - 배치, 색상, 크기, 스크롤 전환, 모바일 스타일: `app/globals.css`
 - 3D 로고 코인의 크기·회전·조명·조작감: `components/HeroCoin.tsx`
-- 문의 메일 제목과 본문 형식: `app/api/contact/route.ts`
+- 문의 메일 검증과 본문 형식: `contact-worker/src/index.ts`
 - 페이지 제목, 설명, 파비콘: `app/layout.tsx`
 - 로고와 장비 이미지: `public/`
 
@@ -122,6 +146,15 @@ site/
 
 ## 배포
 
-이 프로젝트는 `.openai/hosting.json`에 연결된 Sites 프로젝트로 배포하도록 구성되어 있습니다. 배포 전에는 `npm run lint`와 `npm run build`를 실행해 오류가 없는지 확인하세요.
+이 프로젝트는 `main` 브랜치에 변경 사항을 푸시하면 GitHub Actions가 정적 사이트를 빌드해 GitHub Pages로 배포합니다.
 
-현재 공개 주소: [https://handong-ai-accelerator.songsan3133.chatgpt.site](https://handong-ai-accelerator.songsan3133.chatgpt.site)
+저장소의 `Settings → Pages → Build and deployment → Source`를 `GitHub Actions`로 설정합니다. 문의 Worker를 배포한 뒤 `Settings → Secrets and variables → Actions → Variables`에 다음 저장소 변수를 추가합니다.
+
+```text
+Name: NEXT_PUBLIC_CONTACT_API_URL
+Value: https://<worker-name>.<account>.workers.dev/contact
+```
+
+`RESEND_API_KEY`는 GitHub에 넣지 않고 Cloudflare Worker Secret으로만 관리합니다.
+
+GitHub Pages 주소: [https://ax-center.github.io/hgu-ai-accelerator/](https://ax-center.github.io/hgu-ai-accelerator/)

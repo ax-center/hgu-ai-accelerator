@@ -168,3 +168,4 @@ footer{padding:22px max(28px,calc((100vw - 1200px)/2)) 18px}
 }
 @media(max-width:520px){.aipub-node h3{font-size:19px}.aipub-node p{font-size:12px}.resource-node h3{font-size:17px}.resource-node img{width:58px;height:58px}.resource-node{gap:14px}}
 @media(prefers-reduced-motion:reduce){.infra-node{opacity:1;transform:none;animation:none!important}.connector-draw{stroke-dashoffset:0;animation:none!important}.connector-flow{display:none}.connector-dot{opacity:.8;animation:none!important}}
+.form-honeypot{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}
