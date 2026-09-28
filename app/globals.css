@@ -123,9 +123,9 @@ footer{padding:22px max(28px,calc((100vw - 1200px)/2)) 18px}
 .gpu-nav summary::-webkit-details-marker{display:none}.gpu-nav summary:hover{color:var(--blue)}
 .gpu-nav summary>a{color:inherit;text-decoration:none}
 .gpu-nav summary svg{transition:transform .2s}.gpu-nav[open] summary svg{transform:rotate(180deg)}
-.gpu-dropdown{position:absolute;top:34px;left:50%;width:210px;padding:8px;display:flex;flex-direction:column;gap:2px;transform:translateX(-50%);border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.98);box-shadow:0 18px 45px rgba(12,43,70,.15)}
-.gpu-dropdown a{min-height:42px;padding:9px 10px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-radius:7px;font-size:13px}
-.gpu-dropdown a:hover{color:var(--blue);background:#eef5fc}.gpu-dropdown small{padding:3px 6px;border-radius:12px;color:#527089;background:#edf3f8;font-size:10px;font-weight:700;white-space:nowrap}
+.gpu-dropdown{position:absolute;top:34px;left:50%;width:290px;padding:8px;display:flex;flex-direction:column;gap:2px;transform:translateX(-50%);border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.98);box-shadow:0 18px 45px rgba(12,43,70,.15)}
+.gpu-dropdown a{min-height:42px;padding:9px 10px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;border-radius:7px;font-size:13px}.gpu-dropdown a span{min-width:0;white-space:nowrap}
+.gpu-dropdown a:hover{color:var(--blue);background:#eef5fc}.gpu-dropdown small{flex:none;padding:3px 6px;border-radius:12px;color:#527089;background:#edf3f8;font-size:10px;font-weight:700;white-space:nowrap}
 @media(max-width:720px){.gpu-nav{width:100%;font-size:15px}.gpu-nav summary{justify-content:space-between;width:100%;padding:2px 0}.gpu-dropdown{position:static;width:100%;margin-top:9px;padding:6px;transform:none;border-radius:8px;background:#f4f7fa;box-shadow:none}.gpu-dropdown a{width:100%;padding:9px 10px}}
 
 /* AIPub-centered infrastructure system diagram */
