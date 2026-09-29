@@ -176,3 +176,13 @@ footer{padding:22px max(28px,calc((100vw - 1200px)/2)) 18px}
   .story-nav button{width:56px}
   .story-nav button span{display:none}
 }
+
+/* Hierarchical GPU scene navigation */
+@media(min-width:901px){
+  .story-nav-gpu-group{display:flex;flex-direction:column;gap:5px}
+  .story-nav-submenu{display:flex;max-height:0;flex-direction:column;gap:4px;overflow:visible;opacity:0;visibility:hidden;transform:translateY(-4px);pointer-events:none;transition:max-height .25s ease,opacity .2s ease,transform .2s ease,visibility .2s}
+  .story-nav-gpu-group:hover .story-nav-submenu,.story-nav-gpu-group:focus-within .story-nav-submenu,.story-nav-gpu-group.has-active .story-nav-submenu{max-height:90px;opacity:1;visibility:visible;transform:none;pointer-events:auto}
+  .story-nav-submenu button i{left:12px;width:16px;background:#b4c1cc}
+  .story-nav-submenu button span{left:68px;font-size:10px}
+  .story-nav-submenu button.is-active i{width:32px;background:var(--blue)}
+}
